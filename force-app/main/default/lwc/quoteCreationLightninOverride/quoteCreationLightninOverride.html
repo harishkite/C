@@ -1,0 +1,15 @@
+<template>
+    <template if:true={error}>
+        <div class="slds-box slds-theme--default" role="alert">
+            <div class="slds-align--absolute-center">
+                <div class="slds-p-right_x-small">
+                    <lightning-icon size="small" icon-name="utility:warning" alternative-text="Warning!" variant="warning"></lightning-icon>
+                </div>
+                <div class="slds-text-heading_small">{errorMessage}</div>
+                <!--<a href="javascript:void(0);">Log out</a>-->
+                <lightning-button label="Go Back" title="Click here to go back" onclick={cancelClick} class="slds-m-left_x-small slds-p-right_xxx-small"></lightning-button>
+            </div>
+
+        </div>
+    </template>
+</template>

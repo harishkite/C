@@ -1,0 +1,47 @@
+<template>
+    <!--<div style="height: 300px;">
+        <lightning-datatable
+                key-field="id"
+                data={quoteNotesSelectionData}
+                columns={columns}>
+        </lightning-datatable>
+    </div>  -->
+    <template if:true={quoteNotesSelectionData}>
+    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+            <thead>
+                <tr class="slds-line-height_reset">
+                    <th class="" scope="col">
+                        <div class="slds-truncate">
+                            <lightning-input onchange={allSelected} type="checkbox"></lightning-input>
+                        </div>
+                    </th>
+                    <th class="" scope="col">
+                        <div class="slds-truncate" title="Code">Code</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div class="slds-truncate" title="Description">Description</div>
+                    </th>                    
+                </tr>
+            </thead>
+            <tbody>
+                <template for:each={quoteNotesSelectionData} for:item="notes">
+                  <tr key={notes.code}>
+                        <th scope="col">
+                            <div>
+                               <lightning-input type="checkbox" value={notes.code} data-id={notes.code} data-element="notes-checkbox"></lightning-input>
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="notedescription">{notes.code}</div>
+                        </th>
+                        <th scope="col">
+                            <div class="notedescription">{notes.description}  
+                             {notes.shortdescription} <span class="color:red;">{notes.model}</span>
+                            </div>
+                        </th>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </template>
+</template>

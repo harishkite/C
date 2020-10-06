@@ -1,0 +1,323 @@
+<template>
+    <div lwc:dom="manual"></div>
+    <div id="pageDiv" class="slds-tabs_card">
+        <!--Spinner START-
+    <div class="slds-m-around_large">        
+         <div if:false={isLoaded} class="slds-is-relative">
+            <lightning-spinner
+                alternative-text="Loading..." variant="brand">
+            </lightning-spinner>
+        </div>
+    </div>
+    Spinner END  -->
+        <template if:true={loadingSpinner}>
+            <div class="slds-align--absolute-center slds-m-around_large">
+                <lightning-spinner alternative-text="Loading..." variant="brand" class={spinnerCSS}>
+                </lightning-spinner>
+            </div>
+        </template>
+        <template if:true={errorMessage}>
+            <div class="slds-box slds-theme--default" role="alert">
+                <div class="slds-align--absolute-center">
+                    <div class="slds-p-right_x-small">
+                        <lightning-icon size="small" icon-name="utility:warning" alternative-text="Warning!"
+                            variant="warning"></lightning-icon>
+                    </div>
+                    <div class="slds-text-heading_small">{errorMessage}</div>
+                </div>
+            </div>
+        </template>
+        <!--Rep Information START-->
+        <!--<template if:true={isCopyOperation}>
+        <c-quote-rep-customer-multi-selection opp-id={oppId} operation="Copy" onselectrepcustcopy={selectedrepcustcopy}></c-quote-rep-customer-multi-selection>
+    </template>    -->
+        <!--<template>-->
+        <!--<c-quote-rep-customer-multi-selection opp-id={oppId} operation={operation} onselectrep={selectedrepinfo}
+            onselectcustomer={selectedcustomerinfo}></c-quote-rep-customer-multi-selection>-->
+    <!--        <lightning-button variant="brand" type="check" name="check" label="check" onclick={resetForm}>                
+            </lightning-button>-->
+            
+        <!--</template>    -->
+        <!--Rep Information END-->
+        <!--quoteId=={quoteId}=END-->
+        <!--operation={operation}=oppId={oppId}=quoteId={quoteId}-->
+        <!--profilename={profilename} ==
+                            productid={productid} ==
+                            notesvalue={notevalue} ==
+                            notetable={notetable} ==-->
+        <lightning-record-edit-form record-id={quoteId} object-api-name="Quotes__c" onsubmit={saveQuote}
+            onsuccess={webserviceCallout}>
+            <lightning-messages>
+            </lightning-messages>
+            
+            <div class="slds-align_absolute-center" style="height:5rem">
+                <div class="slds-p-horizontal_x-small">
+                    <lightning-button variant="brand" type="submit" name="save" label="Save">                
+                    </lightning-button>
+                </div>
+                <div class="slds-p-horizontal_x-small">
+                    <lightning-button variant="brand" type="cancel" name="cancel" label="Cancel" onclick={cancelRedirect}>                
+                    </lightning-button>
+                </div>  
+            </div>
+            <!--Rep and customer information START-->        
+            <c-quote-rep-customer-multi-selection 
+            selected-rep-val={selectedRep} 
+            selected-cust-val={selectedCustomer} 
+            opp-id={oppId} 
+            operation={operation} 
+            onselectrep={selectedrepinfo}            
+            onselectcustomer={selectedcustomerinfo}></c-quote-rep-customer-multi-selection>       
+            <!--Rep and customer information END-->        
+            <div class="slds-section slds-is-open">
+                <h3 class="slds-section__title">
+                    <div aria-controls="expando-unique-id" aria-expanded="true"
+                        class="slds-button slds-section__title-action">
+                        <svg class="slds-section__title-action-icon slds-button__icon slds-button__icon_left"
+                            aria-hidden="true">                            
+                        </svg>
+                        <span class="slds-truncate" title="Information">Information</span>
+                    </div>
+                </h3>
+                <div class="slds-section__content">
+                    <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Quote_Name__c" value={opportunityName}>
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input value={loggedinusername} label="Owner Name" read-only>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-output-field field-name="Name">
+                            </lightning-output-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="C_S_Opportunity__c" value={oppId} disabled>
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Opportunity_Name__c" value={opportunityName}>
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Project__c" value={projectId} disabled>
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-output-field field-name="Erapid_Quote_no__c">
+                            </lightning-output-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="PSA_Quote_Type__c" required>
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Status__c" required>
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Quote_Scource__c" required>
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="IsSyncing__c">
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="CS_Ref_Number__c">
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Type_of_Quote__c" required>
+                            </lightning-input-field>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="slds-section slds-is-open">
+                <h3 class="slds-section__title">
+                    <div aria-controls="expando-unique-id" aria-expanded="true"
+                        class="slds-button slds-section__title-action">
+                        <svg class="slds-section__title-action-icon slds-button__icon slds-button__icon_left"
+                            aria-hidden="true">
+                            
+                        </svg>
+                        <span class="slds-truncate" title="Dates">Dates</span>
+                    </div>
+                </h3>
+                <div class="slds-section__content">
+                    <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Expiration_Date__c">
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Quote_Issue_Date__c">
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Quote_Issue_Date__c">
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-section slds-is-open">
+                <h3 class="slds-section__title">
+                    <div aria-controls="expando-unique-id" aria-expanded="true"
+                        class="slds-button slds-section__title-action">
+                        <svg class="slds-section__title-action-icon slds-button__icon slds-button__icon_left"
+                            aria-hidden="true">
+                            <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#switch"></use>
+                        </svg>
+                        <span class="slds-truncate" title="Value Information">Value Information</span>
+                    </div>
+                </h3>
+                <div class="slds-section__content">
+                    <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Amount__c">
+                            </lightning-input-field>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-section slds-is-open">
+                <h3 class="slds-section__title">
+                    <div aria-controls="expando-unique-id" aria-expanded="true"
+                        class="slds-button slds-section__title-action">
+                        <svg class="slds-section__title-action-icon slds-button__icon slds-button__icon_left"
+                            aria-hidden="true">
+                            
+                        </svg>
+                        <span class="slds-truncate" title="Notes">Notes</span>
+                    </div>
+                </h3>
+                <div class="slds-section__content">
+                    <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Qualification_Notes__c">
+                            </lightning-input-field>
+                            
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2 notesdiv" >
+                            <!--<lightning-input-field field-name="Qualificationn_Notes__c" data-element="qlfnotes" class="notesfield">                                
+                            </lightning-input-field>                            -->
+                            <lightning-input type="text" label="Qualification Notes" data-element="qlfnotes" class="slds-form-element_stacked notesfield"></lightning-input>
+                            <lightning-button-icon onclick={showQualificationNotes} icon-name="utility:search" alternative-text="Save" class="slds-m-left_xx-small notedLookupButton" title="Save">
+                            </lightning-button-icon> 
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Exclusion_Notes__c">
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2 notesdiv">
+                            <!--<lightning-input-field field-name="Exclusion_Notess__c" data-element="excnotes" class="notesfield">
+                            </lightning-input-field>-->
+                            <lightning-input type="text" label="Exclusion Notes" data-element="excnotes" class="slds-form-element_stacked notesfield"></lightning-input>
+                            <lightning-button-icon onclick={showExclusionNotes} icon-name="utility:search" alternative-text="Save" class="slds-m-left_xx-small notedLookupButton" title="Save">
+                            </lightning-button-icon>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Free_Text__c">
+                            </lightning-input-field>
+                            
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Internal_Notes__c">
+                            </lightning-input-field>
+                        </div>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Notes_Internes2__c">
+                            </lightning-input-field>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="slds-section slds-is-open">
+                <h3 class="slds-section__title">
+                    <div aria-controls="expando-unique-id" aria-expanded="true"
+                        class="slds-button slds-section__title-action">
+                        <svg class="slds-section__title-action-icon slds-button__icon slds-button__icon_left"
+                            aria-hidden="true">
+                            
+                        </svg>
+                        <span class="slds-truncate" title="Other Information">Other Information</span>
+                    </div>
+                </h3>
+                <div class="slds-section__content">
+                    <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="ERP_Order_Number__c">
+                            </lightning-input-field>
+                        </div>
+
+
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
+                            <lightning-input-field field-name="Import_Marker__c	">
+                            </lightning-input-field>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="slds-align_absolute-center" style="height:5rem">
+                <div class="slds-p-horizontal_x-small">
+                    <lightning-button variant="brand" type="submit" name="save" label="Save">                
+                    </lightning-button>
+                </div>
+                <div class="slds-p-horizontal_x-small">
+                    <lightning-button variant="brand" type="cancel" name="cancel" label="Cancel" onclick={cancelRedirect}>                
+                    </lightning-button>
+                </div>  
+            </div>
+        </lightning-record-edit-form>
+        <!--\\\\\\\\\\\\\\\\\\NOTES POPUP START//////////////////////////-->
+        <template if:true={isNotesModalOpen}>
+            <!-- Modal/Popup Box LWC starts here -->
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container" style="width: 80%;max-width: 80%;">
+                    <!-- Modal/Popup Box LWC header here -->
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close"
+                                alternative-text="close"
+                                variant="inverse"
+                                size="small" ></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{notespopupheader}</h2>
+                    </header>
+                    <!-- Modal/Popup Box LWC body starts here -->
+                    <!--<profilename={profilename} ==
+                            productid={productid} ==
+                            notesvalue={notevalue} ==
+                            notetable={notetable} ==>-->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <c-quote-notes-selection-l-w-c 
+                            profilename={profilename} 
+                            productid={productid} 
+                            notesvalue={notevalue} 
+                            notetable={notetable}>
+                        </c-quote-notes-selection-l-w-c>
+                    </div>
+                    <!-- Modal/Popup Box LWC footer starts here -->
+                    <footer class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral" onclick={closeModal} title="Cancel">Cancel</button>
+                        <button class="slds-button slds-button_brand" onclick={submitNotes} title="OK">Save Notes</button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+        <!--NOTES POPUP END-->
+    </div>
+</template>

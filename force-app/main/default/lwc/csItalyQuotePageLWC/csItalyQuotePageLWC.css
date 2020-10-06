@@ -1,0 +1,30 @@
+.notesfield
+{
+    display:table-cell;
+}
+.notedLookupButton
+{
+    display:table-cell;
+    vertical-align:bottom;
+}
+.notesdiv
+{
+    display:table;
+}
+.spinnerClass
+{
+    position:fixed;
+    top: 0;
+    left: 0;
+    
+    right: 0;
+    bottom: 0;
+}
+.spinnerClass::after {
+    position: absolute;
+    content: 'Contacting CS Erapid to generate a quote';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 3em);
+    /*font-weight: bold;*/
+}
