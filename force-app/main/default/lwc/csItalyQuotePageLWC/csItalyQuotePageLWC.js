@@ -26,6 +26,9 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
     @track notetable;
     @track notevalue;
     @track productid;
+    @track excnotes = this.template.querySelector('[data-element="excnotes"]');
+    @track qlfnotes = this.template.querySelector('[data-element="qlfnotes"]');
+
     showQualificationNotes()
     {
         this.isNotesModalOpen = true;
@@ -41,7 +44,7 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
         this.isNotesModalOpen = true;
         this.notespopupheader = 'Select Exclusion Notes';
         this.notetable = 'CS_EXC_NOTES';
-        this.notevalue = this.template.querySelector('[data-element="excnotes"]').value;;
+        this.notevalue = this.template.querySelector('[data-element="excnotes"]').value;
     }
     closeModal()
     {
@@ -216,6 +219,9 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
                 if(this.operation!='New' && result.C_S_Opportunity__c!=null)
                 {
                     this.oppId = result.C_S_Opportunity__c;
+                    //Custom Populating Qualification and Exclusion Notes as Inputfield is not supporting few things
+                    this.excnotes.value = result.Exclusion_Notess__c;
+                    this.qlfnotes.value = result.Qualificationn_Notes__c;
                 }        
                 //console.log('inputfields filling=='+JSON.stringify(inputFields));        
                 if (inputFields) {
