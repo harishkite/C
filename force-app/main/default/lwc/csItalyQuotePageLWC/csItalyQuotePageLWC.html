@@ -45,8 +45,10 @@
                             productid={productid} ==
                             notesvalue={notevalue} ==
                             notetable={notetable} ==-->
-        <lightning-record-edit-form record-id={quoteId} object-api-name="Quotes__c" onsubmit={saveQuote}
-            onsuccess={webserviceCallout}>
+        <lightning-record-edit-form record-id={quoteId} object-api-name="Quotes__c" 
+        onsubmit={saveQuote}
+        onsuccess={webserviceCallout}
+        onerror={errorInForm}>
             <lightning-messages>
             </lightning-messages>
             
@@ -155,11 +157,11 @@
                             </lightning-input-field>
                         </div>
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
-                            <lightning-input-field field-name="Quote_Issue_Date__c">
+                            <lightning-input-field field-name="Issue_Date__c">
                             </lightning-input-field>
                         </div>
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
-                            <lightning-input-field field-name="Quote_Issue_Date__c">
+                            <lightning-input-field field-name="Followup_Date__c"><!--added as it is on Quote header in erapid-->
                             </lightning-input-field>
                         </div>
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
@@ -182,7 +184,7 @@
                 <div class="slds-section__content">
                     <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
-                            <lightning-input-field field-name="Amount__c">
+                            <lightning-input-field field-name="Grand_Total__c">
                             </lightning-input-field>
                         </div>
                     </div>
@@ -210,7 +212,7 @@
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2 notesdiv" >
                             <!--<lightning-input-field field-name="Qualificationn_Notes__c" data-element="qlfnotes" class="notesfield">                                
                             </lightning-input-field>                            -->
-                            <lightning-input type="text" label="Qualification Notes" data-element="qlfnotes" class="slds-form-element_stacked notesfield"></lightning-input>
+                            <lightning-input type="text" label="Qualification Notes" data-element="qlfnotes" variant="label-stacked" class="notesfield"></lightning-input>
                             <lightning-button-icon onclick={showQualificationNotes} icon-name="utility:search" alternative-text="Save" class="slds-m-left_xx-small notedLookupButton" title="Save">
                             </lightning-button-icon> 
                         </div>
@@ -221,7 +223,7 @@
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2 notesdiv">
                             <!--<lightning-input-field field-name="Exclusion_Notess__c" data-element="excnotes" class="notesfield">
                             </lightning-input-field>-->
-                            <lightning-input type="text" label="Exclusion Notes" data-element="excnotes" class="slds-form-element_stacked notesfield"></lightning-input>
+                            <lightning-input type="text" label="Exclusion Notes" data-element="excnotes" variant="label-stacked" class="notesfield"></lightning-input>
                             <lightning-button-icon onclick={showExclusionNotes} icon-name="utility:search" alternative-text="Save" class="slds-m-left_xx-small notedLookupButton" title="Save">
                             </lightning-button-icon>
                         </div>

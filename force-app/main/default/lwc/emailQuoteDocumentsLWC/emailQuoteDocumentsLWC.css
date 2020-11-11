@@ -1,0 +1,30 @@
+.slds-pill__remove 
+{
+    display: none !important;
+}
+.attachmentItem
+{
+    float:left;
+    padding:0px 2px 0px 2px;
+}
+.attachmentSection
+{
+    margin-top: 6px;
+}
+.spinnerClass
+{
+    position:fixed;
+    top: 0;
+    left: 0;
+    
+    right: 0;
+    bottom: 0;
+}
+.spinnerClass::after {
+    position: absolute;
+    content: 'Loading...';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 3em);
+    /*font-weight: bold;*/
+}

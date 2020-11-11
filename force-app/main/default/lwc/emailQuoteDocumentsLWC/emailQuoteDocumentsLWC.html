@@ -1,0 +1,202 @@
+<template>
+    <div class="slds-tabs_card">
+        <template if:true={loadingSpinner}>
+            <div class="slds-align--absolute-center slds-m-around_large">
+                <lightning-spinner alternative-text="Loading..." variant="brand" class={spinnerCSS}>
+                </lightning-spinner>
+            </div>
+        </template>
+        <template if:true={errorMessage}>
+            <div class="slds-box slds-theme--default" role="alert">
+                <div class="slds-align--absolute-center">
+                    <div class="slds-p-right_x-small">
+                        <lightning-icon size="small" icon-name="utility:warning" alternative-text="Warning!"
+                            variant="warning"></lightning-icon>
+                    </div>
+                    <div class="slds-text-heading_small">{errorMessage}</div>
+                </div>
+            </div>
+        </template>
+        <div class="slds-section slds-is-open">
+            <h3 class="slds-section__title">
+                <div aria-controls="expando-unique-id" aria-expanded="true"
+                    class="slds-button slds-section__title-action">
+                    <svg class="slds-section__title-action-icon slds-button__icon slds-button__icon_left"
+                        aria-hidden="true">                            
+                    </svg>
+                    <span class="slds-truncate" title="Information">{labels.Send_Email}
+                        <h2><span style="font-weight:12px;">{labels.Select_the_files}</span></h2>
+
+                    </span>
+                </div>
+            </h3>
+            
+            
+        <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
+            <!--Document Selection Block START-->        
+            
+                <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-8">
+                </div>
+                <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_6-of-8">
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small">
+                        <lightning-combobox
+                            name="progress"
+                            label={labels.Quote_Type}
+                            value={selectedQuoteType}                            
+                            options={quoteTypes}
+                            onchange={handleQuoteTypeChange}
+                            required>
+                        </lightning-combobox>
+                    </div>
+                    <template if:true={showExtraDocsSection}>
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small">
+                            <lightning-dual-listbox name="languages"
+                                label={labels.default_quote_type}
+                                            source-label="Available"
+                                            selected-label="Selected"
+                                            field-level-help=""
+                                            options={defaultQtTypeOptions}
+                                            value={defaultQuoteType}
+                                            onchange={handleDefaultPicklist}
+                                            size="3"
+                                            data-element="defaultDualList"></lightning-dual-listbox>
+                        </div>
+                    </template>
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small">
+                        <lightning-combobox
+                                        
+                                        label={labels.File_Attachment}
+                                        value={attachmentType}                            
+                                        options={attachmentList}
+                                        onchange={handleAttachmentType}
+                                        ></lightning-combobox>
+                    </div>
+                    <!--Document Selection Block END-->
+                    <!--Recipient block START-->
+                    <!--<lightning-button variant="base" label="Base" title="Looks like a link" onclick={handleClick} class="slds-m-left_x-small"></lightning-button>-->
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small" data-element="recipientsBlock">
+                        <!--<lightning-record-edit-form object-api-name="Quotes__c">
+                            <label for="recipientTo">Recipient</label>
+                            <lightning-input-field id="recipientTo" field-name="Contact_customer__c" variant="label-hidden"></lightning-input-field>
+                        </lightning-record-edit-form>-->
+                        <c-custom-multi-select-lookup
+                        data-element="tocomponent" 
+                        label-name={labels.Recipients}
+                        object-api-name= "Contact"
+                        field-api-names="Id,Name,Email,Account.Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:contact"
+                        default-show-values={defaultToRecipients}
+                        onretrieve={selRecipientsHandler} 
+                        onremove={delRecipientsHandler}>                    
+                        </c-custom-multi-select-lookup>
+                    </div>
+                    <!--CC Recipients START-->
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small" data-element="ccRecipientsBlock">
+                        <!--<lightning-record-edit-form object-api-name="Quotes__c">
+                            <label for="recipientTo">Recipient</label>
+                            <lightning-input-field id="recipientTo" field-name="Contact_customer__c" variant="label-hidden"></lightning-input-field>
+                        </lightning-record-edit-form>-->
+                        <c-custom-multi-select-lookup 
+                        label-name={labels.CC}
+                        object-api-name= "Contact"
+                        field-api-names="Id,Name,Email,Account.Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:contact"
+                        onretrieve={selCcRecipientsHandler} 
+                        onremove={delCcRecipientsHandler}>                    
+                        </c-custom-multi-select-lookup>
+                    </div>
+                    <!--CC Recipients END-->
+                    <!--CC Email START-->
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small" data-element="ccRecipientsBlock">
+                        <!--<lightning-record-edit-form object-api-name="Quotes__c">
+                            <label for="recipientTo">Recipient</label>
+                            <lightning-input-field id="recipientTo" field-name="Contact_customer__c" variant="label-hidden"></lightning-input-field>
+                        </lightning-record-edit-form>-->
+                        
+                    </div>
+                    <!--CC Email   END-->
+                    <!--BCC Recipients START-->
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small" data-element="bccRecipientsBlock">
+                        <!--<lightning-record-edit-form object-api-name="Quotes__c">
+                            <label for="recipientTo">Recipient</label>
+                            <lightning-input-field id="recipientTo" field-name="Contact_customer__c" variant="label-hidden"></lightning-input-field>
+                        </lightning-record-edit-form>-->
+                        <c-custom-multi-select-lookup 
+                        label-name={labels.BCC}
+                        object-api-name= "Contact"
+                        field-api-names="Id,Name,Email,Account.Name"
+                        filter-field-api-name="Name"
+                        icon-name="standard:contact"                        
+                        onretrieve={selBccRecipientsHandler} 
+                        onremove={delBccRecipientsHandler}>                    
+                        </c-custom-multi-select-lookup>
+                    </div>
+                    <!--BCC Recipients END-->
+                    <!--Recipient block END-->
+                    <!--Email Template Block START-->
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small">
+                        <lightning-combobox                            
+                                        label={labels.Template}
+                                        value={selectedTemplate}
+                                        onchange={handleEmailTemplate}                            
+                                        options={emailTemplateOptions}>
+                        </lightning-combobox>
+                    </div>
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small">
+                        <lightning-input                            
+                                        label={labels.Subject}
+                                        value={emailSubject}                            
+                                        options={emailTemplateOptions}>
+                        </lightning-input>
+                    </div>
+                    
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small">
+                        <lightning-input-rich-text
+                                        label={labels.Email_Body}
+                                        value={emailBody}>
+                        </lightning-input-rich-text>
+                    </div>        
+                    <!--Email Template Block END-->
+                    <!--Attachments Block START-->
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 attachmentSection slds-p-top_x-small">
+                        <template if:true={emailAttachmentsList}>
+                            <template for:each={emailAttachmentsList} for:item="item" for:index="index">
+                                <div class="slds-m-bottom--x-small attachmentItem" key={item.docId}>
+                                    <lightning-pill label={item.docName} href={item.hrefUrl}></lightning-pill>
+                                    <!--<lightning-formatted-url value="my/path" label={item.Name} tooltip="Omit leading slash" target="_blank"></lightning-formatted-url>-->                            
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+                    <!--Attachments Block END-->
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small" style="display:table;">
+                        <div class="slds-align_absolute-center" style="height:5rem">
+                            <template if:true={showSendEmail}>
+                                <div class="slds-p-horizontal_x-small">
+                                    <lightning-button variant="brand" type="button" onclick={sendEmail} name="Send Email" label="Send Email">                
+                                    </lightning-button>
+                                </div>
+                            </template>
+                            <template if:true={showNext}>
+                                <div class="slds-p-horizontal_x-small">
+                                    <lightning-button variant="brand" type="button" onclick={getFilesFromServer} name="Next" label={labels.Next}>                
+                                    </lightning-button>
+                                </div>
+                            </template>
+                            <div class="slds-p-horizontal_x-small">
+                                <lightning-button variant="brand" type="button" name="cancel" label="Cancel" onclick={cancelRedirect}>                
+                                </lightning-button>
+                            </div>  
+                        </div>
+                    </div>                
+                </div>
+                <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-8">
+                    
+                </div>
+            </div>
+
+        </div>
+    </div>    
+</template>

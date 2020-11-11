@@ -11,7 +11,7 @@
                         aria-hidden="true">
                        
                     </svg>
-                    <span class="slds-truncate" title="Select Rep and Customer information">Select Rep and Customer information</span>
+                    <span class="slds-truncate" title="Select Rep and Customer information">{labels.SELECT_REP_CUST_INFO_HEADER}</span>
                 </div>
             </h3>
             <template if:true={repCustPicklistData}>
@@ -30,9 +30,8 @@
                             </select>-->
                             <lightning-combobox
                             name="progress"
-                            label="Rep Information"
-                            value={selectedRepVal}
-                            placeholder="Select Rep Information"
+                            label={labels.REP_INFO_HEADER}
+                            value={selectedRepVal}                            
                             options={repPicklist}
                             onchange={repPicklistOnchange} required></lightning-combobox>
                         </div>
@@ -49,9 +48,8 @@
                             </select>-->
                             <lightning-combobox
                             name="progress"
-                            label="Customer Information"
-                            value={selectedCustVal}
-                            placeholder="Select Customer Information"
+                            label={labels.CUST_INFO_HEADER}
+                            value={selectedCustVal}                            
                             options={custPicklist}
                             onchange={custPicklistOnchange} required></lightning-combobox>
                         </div>
@@ -63,14 +61,31 @@
                 <!--<!NEW/EDIT/ALTERNATE Operation END-->
                 <!--Copy Operation START-->
         <template if:true={isCopyOperation}>
+            <div class="slds-section slds-is-open">
+                <h3 class="slds-section__title">
+                    <div aria-controls="expando-unique-id" aria-expanded="true"
+                        class="slds-button slds-section__title-action">
+                        <svg class="slds-section__title-action-icon slds-button__icon slds-button__icon_left"
+                            aria-hidden="true">
+                           
+                        </svg>
+                        <span class="slds-truncate" title="Select Rep and Customer information">{labels.SELECT_REP_CUST_INFO_HEADER}</span>
+                    </div>
+                </h3>
+                <!---->
+                <div class="slds-section__content">
+                    <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
+                        <div class="slds-form-element slds-col slds-p-horizontal_medium">
+                <!---->
             <div class="slds-m-bottom--x-small">
-            <div class="slds-grid slds-wrap">                
+                
+                <div class="slds-grid slds-wrap">                
                     <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_5-of-12">Rep Information</div>
                     <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_5-of-12">Customer Information</div>
                     <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_2-of-12">Action</div>
                 
-                    </div>
                 </div>
+            </div>
         <template for:each={itemList} for:item="item" for:index="index" >
             <div class="slds-m-bottom--x-small" key={item.key}>
                     <div class="slds-grid slds-wrap">
@@ -87,11 +102,11 @@
                             <lightning-combobox
                             name="progress"   
                             data-id={item.key}                         
-                            value={item.repid}
-                            placeholder="Select Rep Information"
+                            value={item.repid}                            
                             options={repPicklist}
                             onchange={selectRepCopy}
-                            ></lightning-combobox>
+                            variant="label-hidden"
+                            required></lightning-combobox>
                         </div>
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_5-of-12">
                             <!--<select class="slds-select" onchange={selectCustCopy} data-id={item.key} value={item.repid}>
@@ -106,11 +121,11 @@
                             <lightning-combobox
                             name="progress"                            
                             data-id={item.key}
-                            value={item.customerid}
-                            placeholder="Select Customer Information"
+                            value={item.customerid}                            
                             options={custPicklist}
                             onchange={selectCustCopy}
-                            ></lightning-combobox>                            
+                            variant="label-hidden"
+                            required></lightning-combobox>                            
                         </div>
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_2-of-12" >
                             <lightning-icon icon-name="utility:delete" access-key={item.key} id={index}
@@ -121,6 +136,7 @@
             </div>
 
         </template>
+        
         <!--<lightning-icon icon-name="action:new" access-key={item.key} id={index}
                                 alternative-text="Add Row" size="small" title="Add Row" onclick={addRow}>
             </lightning-icon>-->
@@ -128,6 +144,10 @@
         <lightning-icon icon-name="action:new" alternative-text="Add Row" size="small" title="Add Row" onclick={addRow} >
         </lightning-icon>
     
+        </div>
+    </div>
+</div>
+</div>
         </div>
     </template>
 

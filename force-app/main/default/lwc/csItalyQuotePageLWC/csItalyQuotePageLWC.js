@@ -9,9 +9,12 @@ import populateQuoteFields from '@salesforce/apex/quoteLightningUtility.populate
 import quoteAllFields from '@salesforce/apex/quoteLightningUtility.quoteAllFields';
 import erapidCall from '@salesforce/apex/quoteLightningUtility.callErapidWebService';
 import { refreshApex } from '@salesforce/apex';
-import repcustomerwarning from '@salesforce/label/c.Save';
 import multiquotecreation from '@salesforce/apex/quoteLightningUtility.multiQuoteCreation';
 import multiquotecreationcallout from '@salesforce/apex/quoteLightningUtility.callErapidWebServiceMultiple';
+/*---IMORTING CUSTOM LABELS FOR TRANSLATIONS-----START---*/
+//Please Select Rep and Customer Information to Create Quote
+import REP_CUST_WARNING from '@salesforce/label/c.ADS_Cranford_Poland_New_Quote_Creation_Error';
+
 const CSOPP_FIELDS = [
     'C_S_Opportunity__c.Name',
     'C_S_Opportunity__c.Project__c',
@@ -19,16 +22,17 @@ const CSOPP_FIELDS = [
     'C_S_Opportunity__c.CS_Product_Added__c'    
 ];
 export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElement) {
+    //Custom Labels import
+    labels = {REP_CUST_WARNING};
     /*--For Notes---*/
     @track isNotesModalOpen = false;
     @track notespopupheader = '';
     @track profilename;
     @track notetable;
     @track notevalue;
-    @track productid;
-    @track excnotes = this.template.querySelector('[data-element="excnotes"]');
-    @track qlfnotes = this.template.querySelector('[data-element="qlfnotes"]');
-
+    @track productid;    
+    fillquotefields = true;
+    
     showQualificationNotes()
     {
         this.isNotesModalOpen = true;
@@ -52,14 +56,18 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
     }
     submitNotes()
     {
+        this.fillquotefields=false;
         //console.log('in submitNotes=='+this.template.querySelector('c-quote-notes-selection-l-w-c').selectednotes());
         var notesinput = this.template.querySelector('c-quote-notes-selection-l-w-c').selectednotes();
         this.isNotesModalOpen = false;
         console.log('retObj'+notesinput.notetablename+'=='+notesinput.selectednotes);
         if(notesinput.notetablename=='CS_QLF_NOTES')
         {
-            console.log('notesinput=='+this.template.querySelector('[data-element="qlfnotes"]').value +'='+ notesinput.selectednotes);
+            //this.template.querySelector('[data-element="qlfnotes"]').reset();
+            //console.log('notesinput=='+this.template.querySelector('[data-element="qlfnotes"]').value +'='+ notesinput.selectednotes);
             this.template.querySelector('[data-element="qlfnotes"]').value = notesinput.selectednotes;
+            //this.qlfnote = notesinput.selectednotes;
+            //console.log('notesinput=after=='+this.template.querySelector('[data-element="qlfnotes"]').value);
         }
         if(notesinput.notetablename=='CS_EXC_NOTES')
         {
@@ -87,7 +95,7 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
              this.profilename = data.fields.Profile.value.fields.Name.value;
          }
      }
-    label = {repcustomerwarning};
+    
     @track loadingSpinner=false;
     @track spinnerCSS='spinnerClass'
     @track projectId;
@@ -125,6 +133,7 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
         }
         return false;
     } 
+    
     @api quoteId;
     /*get quoteId()
     {
@@ -148,16 +157,25 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
     
     selectedrepinfo(event)
     {   
+        this.fillquotefields=false;
         this.selectedRep = event.detail;
     }      
+    selectedcustomerinfo(event)
+    {
+        this.fillquotefields=false;
+        this.selectedCustomer = event.detail;
+    }
     /*--Populate Selected Rep Customer Info from inside component--END----*/
 
     /*--GET CS Opp Data START--*/    
     @wire(getRecord, { recordId: '$oppId', fields: CSOPP_FIELDS}) csOpportunity
     ({data, error}) {
-        if(data) {
+        if(data) {            
             this.projectId = data.fields.Project__c.value;
-            this.opportunityName = data.fields.Opportunity_Name__c.value;
+            if(this.operation=='New')
+            {
+                this.opportunityName = data.fields.Opportunity_Name__c.value;
+            }            
             this.productid = data.fields.CS_Product_Added__c.value;
         }
     }
@@ -171,11 +189,13 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
         //this.oppId = this.currentPageReference.state.c__oppId;
         //console.log('OPP ID in connecetedcallback=='+this.oppId);
         //this.operationOfQuote = this.currentPageReference.state.c__operation;
-        if(this.recordId!=null && this.recordId!='undefined' && this.recordId.startsWith('a0d'))
+        //if(this.recordId!=null && this.recordId!='undefined' && this.recordId.startsWith('a0d'))
+        if(this.recordId && this.recordId.startsWith('a0d'))
         {
             this.oppId = this.recordId;
         }
-        if(this.operation=='Edit' && this.recordId!=null && this.recordId!='undefined' && this.recordId.startsWith('a0M'))
+        //if(this.recordId && this.operation=='Edit' && this.recordId!=null && this.recordId!='undefined' && this.recordId.startsWith('a0M'))
+        if(this.recordId && this.operation=='Edit' && this.recordId.startsWith('a0M'))
         {
             this.quoteId = this.recordId;
         }
@@ -188,19 +208,21 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
         } */       
     }       
     renderedCallback() { 
-        if(this.operation!='New')
+        if(this.operation!='New' && this.fillquotefields)
         {
             this.fillQuoteFieldsInCopyAndAlternate();
         } 
+        console.log('in renderedcallback');
     }
     fillQuoteFieldsInCopyAndAlternate()
     {
         //console.log('renderedCallback==this.loadingSpinner=='+this.loadingSpinner+'==');        
         const inputFields = this.template.querySelectorAll('lightning-input-field');
         /*--Populating Quote fields in Copy and Alternate Operation--START---*/
-        //console.log('this.recordId=='+this.recordId+'=END');
+        console.log('this.recordId=='+this.recordId+'=END');
         //console.log('template==inputFields==='+JSON.stringify(inputFields));
-        if(this.recordId!=null && this.recordId!='undefined' && this.recordId.startsWith('a0M'))
+        //if(this.recordId!=null && this.recordId!='undefined' && this.recordId.startsWith('a0M'))
+        if(this.recordId && this.recordId.startsWith('a0M'))
         {
             //Below quoteAllFields methid is querying all quoute fields from Apex Controller and get result
             quoteAllFields({quoteId:this.recordId})
@@ -216,12 +238,19 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
                     this.selectedCustomer = result.Account_Customer__c+'##'+result.Contact_customer__c;
                 }                
                 //console.log('passValuesToChildRepCust=='+this.selectedRep+'=='+this.selectedCustomer);
-                if(this.operation!='New' && result.C_S_Opportunity__c!=null)
+                if(this.operation!='New' && result.C_S_Opportunity__c)
                 {
                     this.oppId = result.C_S_Opportunity__c;
                     //Custom Populating Qualification and Exclusion Notes as Inputfield is not supporting few things
-                    this.excnotes.value = result.Exclusion_Notess__c;
-                    this.qlfnotes.value = result.Qualificationn_Notes__c;
+
+                    if(result.Exclusion_Notess__c)
+                    {
+                        this.template.querySelector('[data-element="excnotes"]').value = result.Exclusion_Notess__c;
+                    }
+                    if(result.Qualificationn_Notes__c)
+                    {                        
+                        this.template.querySelector('[data-element="qlfnotes"]').value = result.Qualificationn_Notes__c;
+                    }                    
                 }        
                 //console.log('inputfields filling=='+JSON.stringify(inputFields));        
                 if (inputFields) {
@@ -236,25 +265,41 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
                 }
             })
             .catch(error => {
+                console.log('error==populateQuoteFields=='+error);
                 console.log('error populateQuoteFields=='+JSON.stringify(error));            
                 this.errorMessage = JSON.stringify(error);
             });
 
-        }
-         
+        }         
         /*--Populating Quote fields in Copy and Alternate Operation---END---*/
 
     }
     /*---SAVE Quote START--*/
     saveQuote(event)
     {   
-        event.preventDefault();                               
+        event.preventDefault();   
+        //Fill Qualification and Exclusion Notes-as we are not using inputfield because it wont support populating data using JS                            
+        this.errorMessage='';
+        let fields = event.detail.fields;                     
+        var qlnotes = this.template.querySelector('[data-element="qlfnotes"]').value;   
+        var exnotes = this.template.querySelector('[data-element="excnotes"]').value;                   
+        //if(qlnotes!=null && qlnotes!='')
+        if(qlnotes)
+        {
+            fields.Qualificationn_Notes__c = qlnotes;
+        }
+        //if(exnotes!=null && exnotes!='')
+        if(exnotes)
+        {
+            fields.Exclusion_Notess__c = exnotes;
+        }
+        //SAVE START----//
         if(this.operation=='Copy')
         {
             var multirepcustlist = this.template.querySelector('c-quote-rep-customer-multi-selection').multirepcust();        
             //console.log('multirepcustlist.length=='+multirepcustlist);            
-            let fields = event.detail.fields;                        
-            console.log('validation=='+this.validateQuoteFieldsCopy(multirepcustlist));
+            
+            //console.log('validation=='+this.validateQuoteFieldsCopy(multirepcustlist));
             if(this.validateQuoteFieldsCopy(multirepcustlist))
             {
                 //console.log('validation success');
@@ -270,6 +315,7 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
                     .then(resultCallout => {                                              
                         //console.log('=2ndtimequotes-copy-insert=length=firstIndex=='+result[0]);
                         //console.log('result length=='+resultCallout.length);
+                        this.errorMessage='';
                         console.log('copyquoteIDs-aftercallout=='+JSON.stringify(resultCallout));                    
                         if(result.length==1)
                         {
@@ -297,25 +343,28 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
             }
         }        
         //console.log('this.validateQuoteFields(event)=='+this.validateQuoteFields(event))
-        if(this.validateQuoteFields(event) && this.operation!='Copy')//Validating Quote Fields
+        if(this.operation!='Copy')//Validating Quote Fields
         {
-            this.errorMessage='';
-            this.loadingSpinner=!this.loadingSpinner;//Show Spinner on Quote Save
-            //console.log('==Success Validation=='+this.baseQuoteNumber);            
-            let fields = event.detail.fields;            
-            populateQuoteFields({quote: JSON.stringify(fields), repId:this.selectedRep, customerId:this.selectedCustomer, operation:this.operation, erapidquotenumber:this.baseQuoteNumber})
-            .then(result => {                          
-                //console.log('result-afterRepInfoPopulate=='+JSON.stringify(result));
-                fields = result;                             
-                fields.Erapid_Quote_no__c='';
-                this.template.querySelector('lightning-record-edit-form').submit(fields);                
-            })
-            .catch(error => {
-                this.loadingSpinner=false;
-                console.log('In error==populatefields'+error);
-                console.log('error-afterRepInfoPopulate=='+JSON.stringify(error));            
-                this.errorMessage = JSON.stringify(error);
-            }); 
+            if(this.validateQuoteFields(event))
+            {
+                this.errorMessage='';
+                this.loadingSpinner=!this.loadingSpinner;//Show Spinner on Quote Save
+                //console.log('==Success Validation=='+this.baseQuoteNumber);            
+                //let fields = event.detail.fields;            
+                populateQuoteFields({quote: JSON.stringify(fields), repId:this.selectedRep, customerId:this.selectedCustomer, operation:this.operation, erapidquotenumber:this.baseQuoteNumber})
+                .then(result => {                          
+                    //console.log('result-afterRepInfoPopulate=='+JSON.stringify(result));
+                    fields = result;                             
+                    fields.Erapid_Quote_no__c='';
+                    this.template.querySelector('lightning-record-edit-form').submit(fields);                
+                })
+                .catch(error => {
+                    this.loadingSpinner=false;
+                    console.log('In error==populatefields'+error);
+                    console.log('error-afterRepInfoPopulate=='+JSON.stringify(error));            
+                    this.errorMessage = JSON.stringify(error);
+                }); 
+            }
         }
     }    
     //Call Erapid webservice
@@ -326,8 +375,9 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
         erapidCall({quoteId: event.detail.id, operation: this.operation})
         .then(result => {
             console.log('callout-result=='+result);
-            this.navigateToRecord('Quotes__c',event.detail.id);
             this.errorMessage='';
+            this.navigateToRecord('Quotes__c',event.detail.id);
+            
             //this.resetForm();
             //console.log(result);
         })
@@ -357,9 +407,10 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
         event.preventDefault();
         console.log('selectedRep=='+this.selectedRep);
         console.log('selectedCust=='+this.selectedCustomer);//this.slectedCustomer
-        if(this.selectedRep==undefined || this.selectedRep=='undefined' || this.selectedRep=='' || this.selectedCustomer==undefined || this.selectedCustomer=='undefined' || this.selectedCustomer=='')
+        //if(this.selectedRep==undefined || this.selectedRep=='undefined' || this.selectedRep=='' || this.selectedCustomer==undefined || this.selectedCustomer=='undefined' || this.selectedCustomer=='')
+        if(!this.selectedRep || !this.selectedCustomer)
         {
-            this.errorMessage = 'Please select Rep and Customer information';//this.label.repcustomerwarning;
+            this.errorMessage = this.labels.REP_CUST_WARNING;
             return false;
         }   
         return true;
@@ -368,10 +419,11 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
     {
         var validation = multirepcustlist.every(function(elem) {
             //console.log('elem=='+elem); //result: "My","name"
-            console.log('elem==repid=='+elem.repid);
+            console.log('elem==repid=='+elem.repid+"=check=");
             console.log('elem==customerid=='+elem.customerid);
-            if (elem.repId=='' || elem.customerid=='') 
-            {                
+            if (!elem.repid || !elem.customerid) 
+            { 
+                console.log("elem.repId=="+elem.repId+"=="+elem.customerid);
                 return false;
             }
             return true;
@@ -379,7 +431,7 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
         console.log('validation=='+validation);
         if(!validation)
         {
-            this.errorMessage = 'Please select Rep and Customer information';
+            this.errorMessage = this.labels.REP_CUST_WARNING;
             return false;
         }
         else
@@ -394,17 +446,22 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
         //this.resetForm();
         var sobject;
         var redirectId;
-        if(this.recordId!=null && this.recordId.startsWith('a0M'))
+        if(this.recordId && this.recordId!=null && this.recordId.startsWith('a0M'))
         {
             sobject='Quotes__c';
             redirectId = this.recordId;
         }
-        else if(this.recordId!=null && this.recordId.startsWith('a0d'))
+        else if(this.recordId && this.recordId!=null && this.recordId.startsWith('a0d'))
         {
             sobject='C_S_Opportunity__c';
             redirectId = this.recordId;
         }
         this.navigateToRecord(sobject,redirectId);
+    }
+    errorInForm(event)
+    {
+        console.log('error=='+JSON.stringify(event));
+        console.log('error=='+JSON.stringify(event.detail));
     }
     //Resetting fields after form submission--START
     resetForm()

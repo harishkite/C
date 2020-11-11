@@ -8,9 +8,12 @@ import repCustomerPicklist from '@salesforce/apex/quoteLightningUtility.repCusto
 //import nonelabel from '@salesforce/label/ADS_Cranford_Poland_New_Quote_Creation_Error';
 import none from '@salesforce/label/c.None';
 import save from '@salesforce/label/c.Save';
+import SELECT_REP_CUST_INFO_HEADER from '@salesforce/label/c.Select_Rep_and_Customer_Information';
+import REP_INFO_HEADER from '@salesforce/label/c.Rep_Information';
+import CUST_INFO_HEADER from '@salesforce/label/c.Customer_Information';
 //import repcustomerwarning from '@salesforce/label/c.Save';
 export default class QuoteRepCustomerMultiSelection extends LightningElement {
-    labels = {none,save};
+    labels = {none,save,SELECT_REP_CUST_INFO_HEADER,REP_INFO_HEADER,CUST_INFO_HEADER};
     @api multirepcust()
     {
         return this.itemList;
@@ -127,8 +130,9 @@ export default class QuoteRepCustomerMultiSelection extends LightningElement {
     {
         //console.log('SelectedRep=='+JSON.stringify(event));
         const selectEvent = new CustomEvent('selectcustomer', {
-            detail: event.target.value,
+            detail: event.target.value
         });
+        console.log('Selected cust in child=='+event.target.value);
         this.dispatchEvent(selectEvent);
         this.customervalue=event.target.value;
     }
