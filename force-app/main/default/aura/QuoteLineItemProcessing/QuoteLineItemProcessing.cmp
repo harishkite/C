@@ -1,0 +1,40 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,flexipage:availableForAllPageTypes,force:lightningQuickAction,force:hasRecordId,lightning:actionOverride,force:hasSObjectName,lightning:isUrlAddressable" access="global" controller="quoteLightningUtility" >    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>	
+    <lightning:navigation aura:id="navService"/>
+    <aura:attribute name="errorMessage" type="String" default=""/>
+    <aura:attribute name="hasError" type="Boolean" default="FALSE"/>
+    <aura:attribute name="quoteid" type="String" default=""/>
+    <aura:attribute name="recordId" type="String" default=""/> 
+    <!--For SPINNER START-->
+    <aura:handler event="aura:waiting" action="{!c.showSpinner}"/>
+    <aura:handler event="aura:doneWaiting" action="{!c.hideSpinner}"/>
+    
+    <aura:renderIf isTrue="{!v.hasError}">
+        <ui:message title="Error" severity="error">
+            {!v.errorMessage}
+        </ui:message>
+        <div class="slds-align_absolute-center slds-p-top_small" style="height:5rem">
+            <lightning:button variant="brand" label="{!$Label.c.Return_to_Quote}" title="{!$Label.c.Return_to_Quote}" onclick="{!c.navigateToQuote}" />
+        </div>
+        
+        <aura:set attribute="else">
+            <!--<div class="exampleHolder">
+                 <lightning:spinner aura:id="mySpinner" class="slds-hide slds-spinner_brand"/>
+             </div>-->
+            <div>
+    <div class="slds-spinner_container" aura:id="spinnnerDiv">
+                <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                    <span class="slds-assistive-text">Loading</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </div>
+    </div>
+            
+            
+        </aura:set>
+    </aura:renderIf>
+    
+    <!--For SPINNER END-->
+    
+</aura:component>

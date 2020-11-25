@@ -10,6 +10,8 @@ import fetchQuoteDocsFromServer from '@salesforce/apex/emailQuoteUtility.fetchQu
 import sendEmail from '@salesforce/apex/emailQuoteUtility.sendEmail';
 import emailTemplates from '@salesforce/apex/emailQuoteUtility.emailTemplateOptions';
 import defaultQuoteTypes from '@salesforce/apex/emailQuoteUtility.defaultQuoteTypes';
+import emailQuoteSetting from '@salesforce/apex/emailQuoteUtility.emailQuoteSetting';
+import bccRecipientsList from '@salesforce/apex/emailQuoteUtility.bccRecipientsList';
 //Import custom labels--
 import Selectfileserapid from '@salesforce/label/c.Select_the_files_from_Erapid_system';
 import default_quote_type from '@salesforce/label/c.default_quote_type';
@@ -33,15 +35,7 @@ import BCC from '@salesforce/label/c.BCC';
 import Send_Email from '@salesforce/label/c.Send_Email';
 import Select_the_files from '@salesforce/label/c.Select_the_files_from_Erapid_system';
 import LINK_OR_ATTACH_TEXT from '@salesforce/label/c.LINK_OR_ATTACH_TEXT';
-const QT_FIELDS = [
-    'Quotes__c.Name',
-    'Quotes__c.Project__c',
-    'Quotes__c.Product_Id__c',
-    'Quotes__c.Contact_customer__c',
-    'Quotes__c.Contact__c',
-    'Quotes__c.Contact__r.Name',
 
-];
 export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningElement) {
     ////////////////////////CUSTOM LOOKUP FOR RECIPIENTS BLOCK JS CODE START///////////////////////////////
     @track selectedItemsToDisplay = ''; //to display items in comma-delimited way
@@ -52,11 +46,18 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
     selectedBccRecipients;////Email Ids - BCC in Email
     //captures the retrieve event propagated from lookup component
     /////////////TO Recipients//////////////////////////////
+    selEmailConList;
     selRecipientsHandler(event){
         //console.log('event=='+event.detail+'=='+JSON.stringify(event.detail));
         let args = JSON.parse(JSON.stringify(event.detail.arrItems));
         let selectedToEmails = event.detail.dataMap;
-        //console.log('Selected Items=='+args);
+        console.log('Selected Items=='+args+'=='+JSON.stringify(args));
+        var conEmailMap=[];
+        args.forEach(function (arr) {
+            console.log('arra=='+JSON.stringify(arr));            
+            conEmailMap.push(arr.value);       
+        });
+        this.selEmailConList = conEmailMap;
         //console.log('Selected Items=='+selectedToEmails);
         selectedToEmails.forEach(function (arrayItem) {
             console.log('arrayItem=='+arrayItem);
@@ -68,6 +69,35 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
     //captures the remove event propagated from lookup component
     delRecipientsHandler(event){
         let args = JSON.parse(JSON.stringify(event.detail.arrItems));
+        var compName=event.target.dataset.element;
+        //console.log('event='+event.target+'=='+JSON.stringify(event.target.dataset.element));
+        //console.log('=removeItem='+event.detail.removeItem);
+        //console.log('=BEFORE=this.defaultToRecipients=='+this.defaultToRecipients+'=='+JSON.stringify(this.defaultToRecipients));        
+        if(this.quoteIdEmailMap)
+        {
+            console.log('In IF');
+            if(this.quoteIdEmailMap.has(event.detail.removeItem))
+            {
+                console.log('In IF2'+event.detail.removeItem+'=='+ this.quoteIdEmailMap.get(event.detail.removeItem));
+                if(compName=='tocomponent')
+                {
+                    this.selectedRecipients = this.selectedRecipients.filter(e => e != this.quoteIdEmailMap.get(event.detail.removeItem));
+                    this.selEmailConList = this.selEmailConList.filter(e => e != event.detail.removeItem);
+                }
+                if(compName=='cccomponent')
+                {
+                    this.selectedCcRecipients = this.defaultCcRecipients.filter(e => e != this.quoteIdEmailMap.get(event.detail.removeItem));
+                }
+                if(compName=='bcccomponent')
+                {
+                    this.selectedBccRecipients = this.defaultBccRecipients.filter(e => e != this.quoteIdEmailMap.get(event.detail.removeItem));
+                }
+                
+            }
+        }
+        console.log('=AFTER=this.selectedToEmails=='+this.selectedRecipients);
+        console.log('=AFTER=this.defaultCcRecipients=='+this.defaultCcRecipients);
+        console.log('=AFTER=this.defaultBccRecipients=='+this.defaultBccRecipients);
         this.displayItem(args);
     }
     /////////////CC Recipients//////////////////////////////    
@@ -131,21 +161,22 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
     showSendEmail=false;
     showNext=true;
 
-
-    /////GET QUOTE RECORD DATA START////////////////////////////////
+   
     productCode;
     quoteFieldsData;
     
-    /////GET QUOTE RECORD DATA END//////////////////////////////////
+   
     @api recordId;
-    selectedQuoteType='1';//Default value 
+    selectedQuoteType;//Default value 
+    selectedQuoteTypeLabel;//Label of value 
     //selectedQuoteTypeVal;
-    @track quoteTypes = [
+    quoteTypes=[];
+    /*@track quoteTypes = [
         {label: this.labels.Quote_Type_1, value: "1"},
         {label: this.labels.Quote_Type_2, value: "2"},
         {label: this.labels.Quote_Type3, value: "3"},
         {label: this.labels.Quote_Type_4, value: "4"}
-    ];
+    ];*/
     
     @track defaultQuoteType;
     @track selecteddefaultTyeps=[];//Array type of selected values in Dual Picklist box
@@ -198,6 +229,31 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
     {
         super();
     }
+
+    bccRecipientList;
+    bccRecipientsData(prodid,sbucode)
+    {
+        var bccData=[];
+        bccRecipientsList({product:prodid,BUName:sbucode})
+        .then(result => {         
+            //console.log('resuly=='+result+'=='+JSON.stringify(result));
+            if (result) {
+                //mapData = [];
+                var opts = result;
+                opts.forEach(function (arrayItem) {            
+                    bccData.push(arrayItem);
+                });
+                this.bccRecipientList=bccData;
+                console.log('this.bccRecipientList='+this.bccRecipientList);
+                this.template.querySelector('[data-element="bcccomponent"]').showDefaultRecords=this.bccRecipientList;
+            }
+         })
+        .catch(error => {
+            this.loadingSpinner=false;
+            console.log('error  types=='+error);            
+            //this.errorMessage = JSON.stringify(error);
+        });
+    }
     fillDefaultTypes(prodid,sbucode)
     {
         //console.log('in method');
@@ -231,55 +287,91 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
     
     defaultRecipients(quoteData)
     {
-        console.log('in setting=defaultRecipients='+quoteData+'='+JSON.stringify(quoteData));
-        console.log('quoteData.Contact_customer__r=='+JSON.stringify(quoteData.Contact_customer__r));
+        var defToRecipients=[];
+        var defCcRecipients=[];
+        var defToEmails=[];
+        var defCcEmails=[];
         if(quoteData.Contact_customer__r)
-        {
-            console.log('in if');
-            this.defaultToRecipients = [
+        {            
+            var selConIdList=[];
+            defToRecipients = [
                 {label: quoteData.Contact_customer__r.Name, value: quoteData.Contact_customer__c}
             ];
-            this.defaultCcRecipients = [
-                {label: quoteData.Contact__r.Name, value: quoteData.Contact__c}
-            ];    
+            this.quoteIdEmailMap.set(quoteData.Contact_customer__r.Id,quoteData.Contact_customer__r.Email);            
+            this.template.querySelector('[data-element="tocomponent"]').setDefaultShowValues(defToRecipients,this.quoteIdEmailMap);
+            defToEmails.push(quoteData.Contact_customer__r.Email);
+            //this.defaultToRecipients = defToEmails;
+            this.selectedRecipients = defToEmails;            
+            selConIdList.push(quoteData.Contact_customer__r.Id);
+            this.selEmailConList = selConIdList;
         }
-        
-          
-        //console.log('this.template.querySelector=='+this.template.querySelector('c-custom-multi-select-lookup'));
-        //this.template.querySelector('c-custom-multi-select-lookup').defaultShowValues(this.defaultToRecipients); 
-        //console.log('defaultCcRecipients=='+this.defaultToRecipients+'=='+JSON.stringify(this.defaultToRecipients));
+        if(quoteData.Contact__r)
+        {            
+            defCcRecipients = [
+                {label: quoteData.Contact__r.Name, value: quoteData.Contact__c}
+            ];     
+            this.quoteIdEmailMap.set(quoteData.Contact__r.Id,quoteData.Contact__r.Email);
+            this.template.querySelector('[data-element="cccomponent"]').setDefaultShowValues(defCcRecipients,this.quoteIdEmailMap);             
+            defCcEmails.push(quoteData.Contact__r.Email);
+            this.selectedCcRecipients = defCcEmails;
+            console.log('onload=='+this.selectedCcRecipients);
+        }
     }
-    handleClick()
+    quoteIdEmailMap = new Map();//Map to store SObject data apart from Label and Value        
+    ////////////////SHOW DEFAULT RECIEPIENTS END////////////////////////    
+    fillEmailQuoteType(res)
     {
-        this.defaultToRecipients = [
-            {label: this.quoteFieldsData.Contact_customer__r.Name, value: this.quoteFieldsData.Contact_customer__c}
-        ];
-          
-        console.log('this.template.querySelector=='+JSON.stringify(this.template.querySelector('[data-element="tocomponent"]')));
-        const abc = this.template.querySelector('[data-element="tocomponent"]').defaultShowValues(); 
-        console.log('defaultCcRecipients=='+this.defaultToRecipients+'=='+JSON.stringify(this.defaultToRecipients));
+        //console.log('in fillEmailQuoteType=='+JSON.stringify(res));
+        emailQuoteSetting({
+            productId:res.Product_Id__c,
+            fieldType:'Quote Type',
+            quoteNo:res.Erapid_Quote_no__c,
+            BUName:res.RecordType.Name
+            })
+            .then(result => { 
+                
+                if (result) {
+                    //mapData = [];
+                    var opts = result;
+                    for(var key in opts){
+                        console.log('key=='+key+'=='+opts[key]);
+                        const tempOpt = {
+                            label: opts[key],
+                            value: key
+                        };
+                        // this.selectOptions.push(option);
+                        if(opts[key]=='File Pdf')
+                        {
+                            this.selectedQuoteType=key;
+                            this.selectedQuoteTypeLabel =  opts[key];
+                        }
+                        this.quoteTypes = [ ...this.quoteTypes, tempOpt ];                
+                    }
+                }
+            })
+            .catch(error => {
+                console.log('error==populateQuoteFields=='+error);
+                console.log('error populateQuoteFields=='+JSON.stringify(error));            
+                this.errorMessage = JSON.stringify(error);
+            });         
     }
-    ////////////////SHOW DEFAULT RECIEPIENTS END////////////////////////
-    renderedCallback()
-    {
-        //this.defaultRecipients(this.quoteFieldsData);
-    }
+    
+    bccDefaultValues=true;//SHOW ONFOUS to Display BCC with default values in the list
     connectedCallback()
-    {
-        //console.log('recordId=='+this.recordId+'=this.productCode='+this.productCode);
-        //console.log('quoteData=='+this.quoteData.data+'=='+JSON.stringify(this.quoteData.data));
+    {        
         this.errorMessage='';        
-        
-        //console.log('childs='+childs+'='+JSON.stringify(childs));
-
+        //Get all Quote fields data required for Email Quote like Default To/CC recipients 
         quoteAllFields({quoteId:this.recordId})
             .then(result => {          
                 //console.log('result=quotedata='+JSON.stringify(result));
                 this.productCode = result.Product_Id__c;
                 this.fillDefaultTypes(result.Product_Id__c,result.RecordType.Name);
+                this.fillEmailQuoteType(result);
+                this.bccRecipientsData(result.Product_Id__c,result.RecordType.Name);
                 this.quoteFieldsData = result;
                 this.emailSubject = 'Erapid Quote no: '+this.quoteFieldsData.Erapid_Quote_no__c+' for '+this.quoteFieldsData.Quote_Name__c+' ('+this.quoteFieldsData.C_S_Opportunity__r.Name+')';
-                //this.defaultRecipients(result);
+                this.defaultRecipients(result);                
+                //this.quoteIdEmailMap.set(resElement.Id,result.Email);//To get Email Id based on ID
                 //result.Contact__c;
                 //result.Contact_customer__c;                
             })
@@ -288,9 +380,10 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
                 console.log('error populateQuoteFields=='+JSON.stringify(error));            
                 this.errorMessage = JSON.stringify(error);
             });
-
-        //this.loadingSpinner=false;
+            ////SHOW DEFAULT VALUES IN BCC////
+            
     }    
+    //Email Template Select List handler
     handleEmailTemplate(event)
     {
         //emailTemplateData
@@ -318,6 +411,7 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
     handleQuoteTypeChange(event)
     {
         this.selectedQuoteType = event.detail.value;
+        this.selectedQuoteTypeLabel = event.target.options.find(opt => opt.value === event.detail.value).label;
         console.log(event.detail.value+'=='+this.selectedQuoteType);
     }
     handleDefaultPicklist(event)
@@ -329,6 +423,7 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
         }        
         //console.log("this.selecteddefaultTyeps=="+this.selecteddefaultTyeps);
     }
+    //Function to get documents from the server (SOAP Callout through APEX Method)
     getFilesFromServer(event)//Next button
     {
         this.loadingSpinner=true;
@@ -339,6 +434,7 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
             fetchQuoteDocsFromServer({defaultQuoteType:this.selecteddefaultTyeps,
                 dwnType:this.attachmentType,
                 selectedQuoteType:this.selectedQuoteType,
+                selectedQuoteTypeLabel:this.selectedQuoteTypeLabel,
                 quoteId:this.recordId
             })
             .then(result => {         
@@ -348,7 +444,10 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
                 this.loadingSpinner=false;
                 this.showSendEmail = true;
                 this.showNext=false;
-                //thhis.emailBody = this.emailBody+''
+                if(result)
+                {
+                    this.processResultInEmailContent(result);
+                }                
                 //this.emailBody = result[0].emailBody;
                 //this.emailSubject = result[0].emailSubject;
              })
@@ -358,48 +457,88 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
                 this.showNext=true;
                 console.log('error quotenotes=='+error);            
                 console.log('error quotenotes=='+JSON.stringify(error));            
+                this.errorMessage = error.errorMessage;
                 //this.errorMessage = JSON.stringify(error);
             });            
         }
     }
+    //Function to process result from Callout and update Email Body with the file names/links
+    processResultInEmailContent(result)
+    {
+        const res = result;
+        var fileNames='';
+        var attType = this.attachmentType;
+        res.forEach(function (arrayItem) {            
+            if(attType=='ATT' && arrayItem.docName){                               
+                fileNames = fileNames.concat('<br>'+arrayItem.docName);                
+            }
+        else if(attType=='URL' && arrayItem.hrefUrl)
+            {
+                fileNames = fileNames.concat('<br>'+arrayItem.hrefUrl);                
+            }
+        });                                                                                                             
+        console.log('fileNames='+fileNames);
+        if(this.emailBody)
+        {            
+            this.emailBody = this.emailBody+'<br/>'+fileNames;
+        }
+        else
+        {
+            this.emailBody = fileNames;
+        }
+    }
+    //Function to send email - using Apex Method - START
     sendEmail(event)
     {
         this.showNext=false;
-        this.loadingSpinner=true;
+        //this.loadingSpinner=true;
         var emailAttachURLs = [];
-        const emailAtts = this.emailAttachmentsList;
-        emailAtts.forEach(function (arrayItem) {
-            console.log('arrayItem=='+arrayItem.docId);
-            if(arrayItem.docId){
-                console.log('in loop');                
-                emailAttachURLs = [ ...emailAttachURLs, arrayItem.docId ];                
-            }
-        });                                                                                                             
-        
-        sendEmail({toAddress:this.selectedRecipients,
+        if(this.emailAttachmentsList)
+        {
+            const emailAtts = this.emailAttachmentsList;        
+            emailAtts.forEach(function (arrayItem) {
+                console.log('arrayItem=='+arrayItem.docId);
+                if(arrayItem.docId){
+                    console.log('in loop');                
+                    emailAttachURLs = [ ...emailAttachURLs, arrayItem.docId ];                
+                }
+            }); 
+        }
+                                                                                                                    
+        //Call Apec Send email
+        //Get to EmailIds
+        //const tovals = this.template.querySelector('[data-element="tocomponent"]').selectedValues;
+        //console.log('tovals='+tovals+'=='+JSON.stringify(tovals));
+        console.log('this.sele='+this.selectedRecipients+'=='+JSON.stringify(this.selectedRecipients));
+        console.log('this.sele='+this.selectedCcRecipients+'=='+JSON.stringify(this.selectedCcRecipients));
+        //console.log('subject:this.emailSubject=='+this.emailSubject);
+        console.log('selEmailConList='+this.selEmailConList+'=='+JSON.stringify(this.selEmailConList));
+        //IF User dont select anything then making th
+        //Merge Recipients based on default recipients END
+        sendEmail({
+            toAddress:this.selectedRecipients,
             ccAddress:this.selectedCcRecipients,
             bccAddress:this.selectedBccRecipients,
-            subject:this.emailSubject,
+            emailSubject:this.emailSubject,
             emailBody:this.emailBody,
             attachments:emailAttachURLs,
-            links:''            
+            toAddressConIds:this.selEmailConList,
+            quoteId:this.recordId  
         })
         .then(result => {         
-            //this.emailAttachmentsList = result;
             console.log('emailll=='+result);  
             console.log('emaill..string=='+JSON.stringify(result));            
-            this.showToastMessage('Success','Email has been sent','success');
-            this.loadingSpinner=false;
-            this[NavigationMixin.Navigate]({
-                type: 'standard__recordPage',
-                attributes: {
-                    objectApiName: 'Quotes__c',
-                    actionName: 'view',
-                    recordId: this.recordId
-                }
-            });
-            //this.emailBody = result[0].emailBody;
-            //this.emailSubject = result[0].emailSubject;
+            if(result=='success')
+            {
+                this.showToastMessage('Success','Email has been sent','success');
+                this.loadingSpinner=false;                
+                this.redirectToQuote();
+            }
+            else
+            {
+                this.loadingSpinner=false;
+                this.errorMessage = result;
+            }
         })
         .catch(error => {
             this.loadingSpinner=false;
@@ -408,6 +547,8 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
             //this.errorMessage = JSON.stringify(error);
         });            
     }
+    //Function to send email - using Apex Method - END
+    //Function to showtoast message
     showToastMessage(titleMsg, message, varnt)
     {
         const event = new ShowToastEvent({
@@ -418,7 +559,8 @@ export default class EmailQuoteDocumentsLWC extends NavigationMixin(LightningEle
         });
         this.dispatchEvent(event);
     }
-    cancelRedirect()
+    //Used in Cancel button and after success of send email 
+    redirectToQuote()
     {
         this[NavigationMixin.Navigate]({
             type: 'standard__recordPage',

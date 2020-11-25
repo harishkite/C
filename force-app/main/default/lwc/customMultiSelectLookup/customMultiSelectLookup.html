@@ -8,7 +8,7 @@
                     <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-has-focus" 
                            role="none">
                         <lightning-input id="input" 
-                            value={searchInput} onchange={onchangeSearchInput} variant="label-hidden" aria-autocomplete="list" role="textbox"
+                            value={searchInput} onchange={onchangeSearchInput} onfocus={handleOnFocus} variant="label-hidden" aria-autocomplete="list" role="textbox"
                             autocomplete="off" placeholder="Search..." type="search">
                             </lightning-input>
                     </div>

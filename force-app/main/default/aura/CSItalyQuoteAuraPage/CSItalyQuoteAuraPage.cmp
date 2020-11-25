@@ -1,0 +1,10 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,flexipage:availableForAllPageTypes,force:lightningQuickAction,force:hasRecordId,lightning:actionOverride,force:hasSObjectName,lightning:isUrlAddressable,lightning:hasPageReference" access="global" >
+    <aura:attribute name="recordId" type="String" default=""/>    
+    <aura:attribute name="operation" type="String" default=""/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+       <!--<aura:attribute name="pageReference" type="object"/> -->
+<lightning:navigation aura:id="navService" />
+    <aura:handler name="change" value="{!v.pageReference}" action="{!c.reInit}" />
+	<c:csItalyQuotePageLWC recordId="{!v.recordId}" operation="{!v.operation}"/>	
+    
+</aura:component>

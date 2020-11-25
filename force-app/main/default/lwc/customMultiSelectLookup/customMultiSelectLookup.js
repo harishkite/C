@@ -3,10 +3,30 @@ import retrieveRecords from '@salesforce/apex/customMultiSelectLookupCtrl.retrie
 
 let i=0;
 export default class customMultiSelectLookup extends LightningElement {
-    @api defaultShowValues()
+    @api defaultShowValues;
+    @track itemMap = new Map();//Map to store SObject data apart from Label and Value
+    @api selectedValues;
+    
+    @api setDefaultShowValues(args,idEmailMap)
     {
-        console.log("vals==");
-        //this.globalSelectedItems = vals;
+        console.log('in it');
+        console.log('args=='+JSON.stringify(idEmailMap));
+        var emailMap = new Map();
+        if(idEmailMap)
+        {
+            idEmailMap.forEach(function(value, key) {
+                console.log(key+'=='+value);
+                emailMap.set(key,value);
+            });
+            this.itemMap = emailMap;
+        }
+        this.defaultShowValues = args;
+        //var vals = [...idEmailMap.values()];
+        //this.selectedValues = [...idEmailMap.values()];//vals;
+        //console.log('this.selectedValues=map-values-'+this.selectedValues+'=='+JSON.stringify(this.selectedValues));
+        //console.log('defaultShowValues=='+this.defaultShowValues+'='+JSON.stringify(this.defaultShowValues));
+        this.globalSelectedItems = this.defaultShowValues;
+
     }
     @track globalSelectedItems = []; //holds all the selected checkbox items
     //start: following parameters to be passed from calling component
@@ -26,7 +46,18 @@ export default class customMultiSelectLookup extends LightningElement {
     isDialogDisplay = false; //based on this flag dialog box will be displayed with checkbox items
     isDisplayMessage = false; //to show 'No records found' message
     
-    @track itemMap = new Map();//Map to store SObject data apart from Label and Value
+    //When User just focus on input box we will show the default values
+    @api showOnFocus=false;
+    @api showDefaultRecords;
+    handleOnFocus()
+    {
+        if(this.showOnFocus)
+        {
+            console.log('in showonfocus if is true=='+this.showDefaultRecords);
+            const searchEv = new CustomEvent("abc",{detail:this.showDefaultRecords});
+            this.onchangeSearchInput(searchEv);
+        }
+    }
     /////SHOW DEFAULT VALUES START////////
     
     constructor()
@@ -35,24 +66,30 @@ export default class customMultiSelectLookup extends LightningElement {
     }
     renderedCallback()
     {
-     //   console.log('in lookup comp - renderedcall-='+this.defaultShowValues+'='+JSON.stringify(this.defaultShowValues));
+        //console.log('in lookup comp - renderedcall-='+this.defaultShowValues+'='+JSON.stringify(this.defaultShowValues));
     }
     connectedCallback()
     {
-       // console.log('in lookup comp - conntectedcallback-='+this.defaultShowValues+'='+JSON.stringify(this.defaultShowValues));
+        //console.log('in lookup comp - conntectedcallback-='+this.defaultShowValues+'='+JSON.stringify(this.defaultShowValues));
         //this.globalSelectedItems = this.defaultShowValues;
     }
     /////SHOW DEFAULT VALUES END//////////
     //This method is called when user enters search input. It displays the data from database.
     onchangeSearchInput(event){
         //console.log("onchange search=="+event.detail.value);
-        this.searchInput = event.target.value;        
-        if(this.searchInput.trim().length>0){
+        console.log('new one='+event.detail);
+        if(event.target)
+        {
+            this.searchInput = event.target.value;        
+        }
+        if(this.searchInput.trim().length>0 || event.detail){
             //retrieve records based on search input
             retrieveRecords({objectName: this.objectApiName,
                             fieldAPINames: this.fieldApiNames,
                             filterFieldAPIName: this.filterFieldApiName,
-                            strInput: this.searchInput
+                            strInput: this.searchInput,
+                            filterInFieldAPIName:'Id',
+                            filterInStrings:event.detail
                             })
             .then(result=>{ 
                 this.items = []; //initialize the array before assigning values coming from apex
@@ -178,7 +215,13 @@ export default class customMultiSelectLookup extends LightningElement {
                 }            
             }
         });
-        console.log('dataMap==sending=='+dataMap+'=='+JSON.stringify(dataMap));
+        /*if(this.selectedValues)
+        {
+            this.selectedValues = this.selectedValues.concat(dataMap);
+            console.log('after concat=='+this.selectedValues+'=='+JSON.stringify(this.selectedValues));
+        }*/
+        
+        //console.log('dataMap=selectedValues=sending=='+selectedValues+'=='+JSON.stringify(this.selectedValues));
         //propagate event to parent component
         const evtCustomEvent = new CustomEvent('retrieve', { 
             detail: {arrItems,dataMap}

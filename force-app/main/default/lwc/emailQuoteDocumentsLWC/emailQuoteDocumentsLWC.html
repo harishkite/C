@@ -72,8 +72,7 @@
                                         ></lightning-combobox>
                     </div>
                     <!--Document Selection Block END-->
-                    <!--Recipient block START-->
-                    <!--<lightning-button variant="base" label="Base" title="Looks like a link" onclick={handleClick} class="slds-m-left_x-small"></lightning-button>-->
+                    <!--Recipient block START-->                    
                     <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-1 slds-p-top_x-small" data-element="recipientsBlock">
                         <!--<lightning-record-edit-form object-api-name="Quotes__c">
                             <label for="recipientTo">Recipient</label>
@@ -85,8 +84,7 @@
                         object-api-name= "Contact"
                         field-api-names="Id,Name,Email,Account.Name"
                         filter-field-api-name="Name"
-                        icon-name="standard:contact"
-                        default-show-values={defaultToRecipients}
+                        icon-name="standard:contact"                        
                         onretrieve={selRecipientsHandler} 
                         onremove={delRecipientsHandler}>                    
                         </c-custom-multi-select-lookup>
@@ -98,13 +96,14 @@
                             <lightning-input-field id="recipientTo" field-name="Contact_customer__c" variant="label-hidden"></lightning-input-field>
                         </lightning-record-edit-form>-->
                         <c-custom-multi-select-lookup 
+                        data-element="cccomponent" 
                         label-name={labels.CC}
                         object-api-name= "Contact"
-                        field-api-names="Id,Name,Email,Account.Name"
+                        field-api-names="Id,Name,Email,Account.Name"                        
                         filter-field-api-name="Name"
                         icon-name="standard:contact"
                         onretrieve={selCcRecipientsHandler} 
-                        onremove={delCcRecipientsHandler}>                    
+                        onremove={delRecipientsHandler}>                    
                         </c-custom-multi-select-lookup>
                     </div>
                     <!--CC Recipients END-->
@@ -125,12 +124,15 @@
                         </lightning-record-edit-form>-->
                         <c-custom-multi-select-lookup 
                         label-name={labels.BCC}
+                        data-element="bcccomponent" 
                         object-api-name= "Contact"
                         field-api-names="Id,Name,Email,Account.Name"
                         filter-field-api-name="Name"
                         icon-name="standard:contact"                        
                         onretrieve={selBccRecipientsHandler} 
-                        onremove={delBccRecipientsHandler}>                    
+                        onremove={delRecipientsHandler}
+                        show-on-focus={bccDefaultValues}
+                        show-default-records={bccRecipientList}>                    
                         </c-custom-multi-select-lookup>
                     </div>
                     <!--BCC Recipients END-->

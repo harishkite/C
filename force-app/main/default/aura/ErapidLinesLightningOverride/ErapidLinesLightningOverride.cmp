@@ -1,0 +1,7 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,flexipage:availableForAllPageTypes,force:lightningQuickAction,force:hasRecordId,lightning:actionOverride,force:hasSObjectName,lightning:isUrlAddressable,lightning:hasPageReference" access="global" controller="quoteLightningUtility" extensible="true">    
+	<aura:attribute name="recordId" type="String" default="{!v.recordId}"/>  
+    <aura:attribute name="erapidquoteno" type="String" default=""/>  
+    <aura:attribute name="erapidId" type="String" default=""/>  
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <lightning:navigation aura:id="navService"/>
+</aura:component>

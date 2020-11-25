@@ -1,0 +1,8 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes,flexipage:availableForAllPageTypes,force:lightningQuickAction,force:hasRecordId,lightning:actionOverride,force:hasSObjectName,lightning:isUrlAddressable" access="global" extends="c:quoteLightningOverride" >    
+    <!--<aura:handler name="myAction" value="{!this}" action="{!c.doInit}"/>-->
+    <aura:attribute name="recordId" type="String" default=""/>    
+    <aura:attribute name="operation" type="String" default="Edit"/>
+    <aura:attribute name="redirectPageName" type="String" default=""/>    
+    <!--<c:quoteCreationLightninOverride recordId="{!v.recordId}"  operation="Copy" sobjectName="{!v.sObjectName}"/>-->
+    
+</aura:component>
