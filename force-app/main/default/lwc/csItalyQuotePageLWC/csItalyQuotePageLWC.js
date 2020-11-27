@@ -14,7 +14,8 @@ import multiquotecreationcallout from '@salesforce/apex/quoteLightningUtility.ca
 /*---IMORTING CUSTOM LABELS FOR TRANSLATIONS-----START---*/
 //Please Select Rep and Customer Information to Create Quote
 import REP_CUST_WARNING from '@salesforce/label/c.ADS_Cranford_Poland_New_Quote_Creation_Error';
-
+import Save from '@salesforce/label/c.Save';
+import Cancel from '@salesforce/label/c.Cancel';
 const CSOPP_FIELDS = [
     'C_S_Opportunity__c.Name',
     'C_S_Opportunity__c.Project__c',
@@ -23,7 +24,7 @@ const CSOPP_FIELDS = [
 ];
 export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElement) {
     //Custom Labels import
-    labels = {REP_CUST_WARNING};
+    labels = {REP_CUST_WARNING,Cancel,Save};
     /*--For Notes---*/
     @track isNotesModalOpen = false;
     @track notespopupheader = '';
@@ -311,7 +312,7 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
                     //console.log('=quotes-copy-insert=length='+result.length);
                     //console.log('=quotes-copy-insert=length=firstIndex=='+result[0]);
                     console.log('copyquoteIDs-afterinsert=='+JSON.stringify(result));
-                    multiquotecreationcallout({copyids: result, operation: 'Copy'})
+                    multiquotecreationcallout({copyids: result, operation: 'Copy',baseQuoteId:this.recordId})
                     .then(resultCallout => {                                              
                         //console.log('=2ndtimequotes-copy-insert=length=firstIndex=='+result[0]);
                         //console.log('result length=='+resultCallout.length);
@@ -350,12 +351,13 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
                 this.errorMessage='';
                 this.loadingSpinner=!this.loadingSpinner;//Show Spinner on Quote Save
                 //console.log('==Success Validation=='+this.baseQuoteNumber);            
-                //let fields = event.detail.fields;            
+                //let fields = event.detail.fields;   
+                console.log('before populate rep cust=fields='+JSON.stringify(fields));         
                 populateQuoteFields({quote: JSON.stringify(fields), repId:this.selectedRep, customerId:this.selectedCustomer, operation:this.operation, erapidquotenumber:this.baseQuoteNumber})
                 .then(result => {                          
-                    //console.log('result-afterRepInfoPopulate=='+JSON.stringify(result));
+                    console.log('result-afterRepInfoPopulate=='+JSON.stringify(result));
                     fields = result;                             
-                    fields.Erapid_Quote_no__c='';
+                    //fields.Erapid_Quote_no__c='';
                     this.template.querySelector('lightning-record-edit-form').submit(fields);                
                 })
                 .catch(error => {

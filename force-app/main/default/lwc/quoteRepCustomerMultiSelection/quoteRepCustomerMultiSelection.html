@@ -14,7 +14,8 @@
                     <span class="slds-truncate" title="Select Rep and Customer information">{labels.SELECT_REP_CUST_INFO_HEADER}</span>
                 </div>
             </h3>
-            <template if:true={repCustPicklistData}>
+            
+            <template if:true={isRepCustAvailable}>
                 <div class="slds-section__content">
                     <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_1-of-2">
@@ -56,8 +57,19 @@
                     </div>
                 </div>
             </template>
+            <template if:false={isRepCustAvailable}>               
+                <div class="slds-box boxBorderZero" role="alert" style="border: 0 !important;">
+                    <div class="slds-align--absolute-center">
+                        <div class="slds-p-right_x-small">
+                            <lightning-icon size="small" icon-name="utility:warning" alternative-text="Warning!"
+                                variant="warning"></lightning-icon>
+                        </div>
+                        <div class="slds-text-heading_small">{labels.QUOTE_UI_REP_CUST_EMPTY}</div>
+                    </div>
+                </div>
+            </template>
         </div>
-                </template>
+        </template>
                 <!--<!NEW/EDIT/ALTERNATE Operation END-->
                 <!--Copy Operation START-->
         <template if:true={isCopyOperation}>
@@ -72,6 +84,7 @@
                         <span class="slds-truncate" title="Select Rep and Customer information">{labels.SELECT_REP_CUST_INFO_HEADER}</span>
                     </div>
                 </h3>
+                <template if:true={isRepCustAvailable}>
                 <!---->
                 <div class="slds-section__content">
                     <div class="slds-form slds-p-around--medium slds-m-bottom--x-small slds-grid slds-wrap">
@@ -148,6 +161,18 @@
     </div>
 </div>
 </div>
+</template>
+<template if:false={isRepCustAvailable}>               
+    <div class="slds-box boxBorderZero" role="alert">
+        <div class="slds-align--absolute-center">
+            <div class="slds-p-right_x-small">
+                <lightning-icon size="small" icon-name="utility:warning" alternative-text="Warning!"
+                    variant="warning"></lightning-icon>
+            </div>
+            <div class="slds-text-heading_small">{labels.QUOTE_UI_REP_CUST_EMPTY}</div>
+        </div>
+    </div>
+</template>
         </div>
     </template>
 

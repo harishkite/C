@@ -11,9 +11,25 @@ import save from '@salesforce/label/c.Save';
 import SELECT_REP_CUST_INFO_HEADER from '@salesforce/label/c.Select_Rep_and_Customer_Information';
 import REP_INFO_HEADER from '@salesforce/label/c.Rep_Information';
 import CUST_INFO_HEADER from '@salesforce/label/c.Customer_Information';
+import QUOTE_UI_REP_CUST_EMPTY from '@salesforce/label/c.Quote_UI_message_Rep_Customer_Empty';
 //import repcustomerwarning from '@salesforce/label/c.Save';
 export default class QuoteRepCustomerMultiSelection extends LightningElement {
-    labels = {none,save,SELECT_REP_CUST_INFO_HEADER,REP_INFO_HEADER,CUST_INFO_HEADER};
+    labels = {none,save,SELECT_REP_CUST_INFO_HEADER,REP_INFO_HEADER,CUST_INFO_HEADER,QUOTE_UI_REP_CUST_EMPTY};
+
+    /*---FOR ERROR MESSGAGE--START---*/
+    get isRepCustAvailable()
+    {
+        if(this.repPicklist && this.custPicklist)
+        {
+            if(this.repPicklist.length>1 && this.custPicklist.length>1)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     @api multirepcust()
     {
         return this.itemList;
