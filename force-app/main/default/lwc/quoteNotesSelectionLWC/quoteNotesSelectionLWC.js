@@ -1,12 +1,17 @@
 //import { LightningElement } from 'lwc';
 import { LightningElement,track,api ,wire } from 'lwc';
 import quoteNotes from '@salesforce/apex/quoteLightningUtility.quoteNotesList';
-
+import Save_Notes from '@salesforce/label/c.Save_Notes';
+import Code from '@salesforce/label/c.Code';
+import Close from '@salesforce/label/c.Close';
+import Description from '@salesforce/label/c.Description';
+Description
 export default class QuoteNotesSelectionLWC extends LightningElement {
     columns = [
         { label: 'Code', fieldName: 'code' },
         { label: 'Description', fieldName: 'description' },       
     ];   
+    labels = {Close,Save_Notes,Code,Description};
     //quoteNotesSelectionData = []; 
     @api profilename;
     @api productid;

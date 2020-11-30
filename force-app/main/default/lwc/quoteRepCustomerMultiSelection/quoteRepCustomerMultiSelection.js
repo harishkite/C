@@ -12,12 +12,16 @@ import SELECT_REP_CUST_INFO_HEADER from '@salesforce/label/c.Select_Rep_and_Cust
 import REP_INFO_HEADER from '@salesforce/label/c.Rep_Information';
 import CUST_INFO_HEADER from '@salesforce/label/c.Customer_Information';
 import QUOTE_UI_REP_CUST_EMPTY from '@salesforce/label/c.Quote_UI_message_Rep_Customer_Empty';
+import Action from '@salesforce/label/c.Action';
+import Delete_Row from '@salesforce/label/c.Delete_Row';
+import Add_Rows from '@salesforce/label/c.Add_Rows';
 //import repcustomerwarning from '@salesforce/label/c.Save';
 export default class QuoteRepCustomerMultiSelection extends LightningElement {
-    labels = {none,save,SELECT_REP_CUST_INFO_HEADER,REP_INFO_HEADER,CUST_INFO_HEADER,QUOTE_UI_REP_CUST_EMPTY};
+    labels = {none,Delete_Row,Add_Rows,Action,save,SELECT_REP_CUST_INFO_HEADER,REP_INFO_HEADER,CUST_INFO_HEADER,QUOTE_UI_REP_CUST_EMPTY};
 
     /*---FOR ERROR MESSGAGE--START---*/
-    get isRepCustAvailable()
+    isRepCustAvailable=true;
+    /*get isRepCustAvailable()
     {
         if(this.repPicklist && this.custPicklist)
         {
@@ -27,7 +31,7 @@ export default class QuoteRepCustomerMultiSelection extends LightningElement {
             }
         }
         return false;
-    }
+    }*/
 
 
     @api multirepcust()
@@ -72,6 +76,21 @@ export default class QuoteRepCustomerMultiSelection extends LightningElement {
                 }
             }
         } 
+        if(this.repPicklist && this.custPicklist)
+        {
+            if(this.repPicklist.length>1 && this.custPicklist.length>1)
+            {
+                this.isRepCustAvailable=true;
+            }
+            else
+            {
+                this.isRepCustAvailable=false;
+            }
+        }
+        else
+        {
+            this.isRepCustAvailable=false;
+        }        
     }
     /*--Filling Rep and Customer Picklist data--END---*/
 
@@ -203,7 +222,10 @@ export default class QuoteRepCustomerMultiSelection extends LightningElement {
         if(this.operation=='Copy')
         {
             console.log('templateSelector=='+JSON.stringify(this.template.querySelector('lightning-icon[accesskey="0"]')));
-            this.template.querySelector('lightning-icon[accesskey="0"]').className='slds-hide';    
+            if(this.template.querySelector('lightning-icon[accesskey="0"]'))
+            {
+                this.template.querySelector('lightning-icon[accesskey="0"]').className='slds-hide';    
+            }
         }        
     }
     /*--COPY Operation logic END---*/

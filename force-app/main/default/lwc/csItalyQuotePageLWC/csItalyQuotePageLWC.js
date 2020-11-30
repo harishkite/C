@@ -13,9 +13,14 @@ import multiquotecreation from '@salesforce/apex/quoteLightningUtility.multiQuot
 import multiquotecreationcallout from '@salesforce/apex/quoteLightningUtility.callErapidWebServiceMultiple';
 /*---IMORTING CUSTOM LABELS FOR TRANSLATIONS-----START---*/
 //Please Select Rep and Customer Information to Create Quote
+import { getObjectInfo } from 'lightning/uiObjectInfoApi';
+import QUOTES_OBJ from '@salesforce/schema/Quotes__c';
 import REP_CUST_WARNING from '@salesforce/label/c.ADS_Cranford_Poland_New_Quote_Creation_Error';
 import Save from '@salesforce/label/c.Save';
 import Cancel from '@salesforce/label/c.Cancel';
+import Select from '@salesforce/label/c.Select';
+import Save_Notes from '@salesforce/label/c.Save_Notes';
+import Close from '@salesforce/label/c.Close';
 const CSOPP_FIELDS = [
     'C_S_Opportunity__c.Name',
     'C_S_Opportunity__c.Project__c',
@@ -24,7 +29,16 @@ const CSOPP_FIELDS = [
 ];
 export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElement) {
     //Custom Labels import
-    labels = {REP_CUST_WARNING,Cancel,Save};
+    sobjLabels;
+    @wire(getObjectInfo, { objectApiName: QUOTES_OBJ })
+    oppInfo({ data, error }) {
+        if (data) 
+        {
+            //console.log('CloseDate Label => '+JSON.stringify(data.fields));   
+            this.sobjLabels = data;
+        }
+    }
+    labels = {REP_CUST_WARNING,Cancel,Save,Select,Save_Notes,Close};
     /*--For Notes---*/
     @track isNotesModalOpen = false;
     @track notespopupheader = '';
@@ -37,7 +51,7 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
     showQualificationNotes()
     {
         this.isNotesModalOpen = true;
-        this.notespopupheader = 'Select Qualification Notes';
+        this.notespopupheader = this.labels.Select+' '+this.sobjLabels.fields.Qualificationn_Notes__c.label;
         this.notetable = 'CS_QLF_NOTES';
         //const noteval=this.template.querySelector('[data-element="qlfnotes"]');
         //console.log('event=='+JSON.stringify(event))
@@ -47,7 +61,7 @@ export default class CsItalyQuotePageLWC extends NavigationMixin(LightningElemen
     showExclusionNotes()
     {
         this.isNotesModalOpen = true;
-        this.notespopupheader = 'Select Exclusion Notes';
+        this.notespopupheader = this.labels.Select+' '+this.sobjLabels.fields.Exclusion_Notess__c.label;
         this.notetable = 'CS_EXC_NOTES';
         this.notevalue = this.template.querySelector('[data-element="excnotes"]').value;
     }

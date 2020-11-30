@@ -93,9 +93,9 @@
             <div class="slds-m-bottom--x-small">
                 
                 <div class="slds-grid slds-wrap">                
-                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_5-of-12">Rep Information</div>
-                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_5-of-12">Customer Information</div>
-                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_2-of-12">Action</div>
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_5-of-12">{labels.REP_INFO_HEADER}</div>
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_5-of-12">{labels.CUST_INFO_HEADER}</div>
+                    <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_2-of-12">{labels.Action}</div>
                 
                 </div>
             </div>
@@ -142,7 +142,7 @@
                         </div>
                         <div class="slds-form-element slds-col slds-p-horizontal_medium slds-size_2-of-12" >
                             <lightning-icon icon-name="utility:delete" access-key={item.key} id={index}
-                                alternative-text="Delete Row" size="small" title="Delete Row" onclick={removeRow} class="slds-icon slds-icon-text-default slds-icon_x-small" >
+                                alternative-text={labels.Delete_Row} size="small" title={labels.Delete_Row} onclick={removeRow} class="slds-icon slds-icon-text-default slds-icon_x-small" >
                             </lightning-icon>
                         </div>
                     </div>                
@@ -154,7 +154,7 @@
                                 alternative-text="Add Row" size="small" title="Add Row" onclick={addRow}>
             </lightning-icon>-->
                 <div class="slds-p-left_large">
-        <lightning-icon icon-name="action:new" alternative-text="Add Row" size="small" title="Add Row" onclick={addRow} >
+        <lightning-icon icon-name="action:new" alternative-text={labels.Add_Rows} size="small" title={labels.Add_Rows} onclick={addRow} >
         </lightning-icon>
     
         </div>
